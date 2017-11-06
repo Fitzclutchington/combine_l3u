@@ -47,3 +47,22 @@ def compute_ending(filepath):
     filename = filepath.split('/')[-1]
     ending = filename.split('-')
     return '-'+'-'.join(ending[1:])
+
+def save_to_netCDF(sst, sza, time, day, save_loc):
+    variable_names = ["sea_surface_temperature", "solar_zenith_angle",
+                      "retrieval_time", "day_mask"]
+    variable_data = [sst, sza, time, day]
+    l2p_name = "l2p_flags"
+
+    h, w = sst.shape
+    
+    rootgrp = netCDF4.Dataset(save_loc, "w", format="NETCDF4")
+    height = rootgrp.createDimension("height", h)
+    width = rootgrp.createDimension("width", w)
+
+    for (variable_name, data) in zip(variable_names,variable_data):
+        var = rootgrp.createVariable(variable_name,"f4",("height","width"),zlib=True)
+        var[:] = data
+
+    rootgrp.close()
+    

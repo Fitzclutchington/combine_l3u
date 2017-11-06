@@ -127,50 +127,29 @@ while current_time != next_day:
             ii = np.round((lat_L2 - p[1])/p[0]).astype(np.int32) - 1
             jj = np.round((lon_L2 - q[1])/q[0]).astype(np.int32) - 1
             
-            """
-            for i in range(ii.shape[0]):
-                for j in range(ii.shape[1]):
-                    H[ii[i,j],jj[i,j]] = H[ii[i,j],jj[i,j]]+1
-                    T[ii[i,j],jj[i,j]] = T[ii[i,j],jj[i,j]] + t_utc[i,j]
-                    S[ii[i,j],jj[i,j]] = S[ii[i,j],jj[i,j]] + sza_interp[i,j]
-            """
-            print "starting remapping"
+
             window_functions.remap(ii, jj, H,  T,  S, t_utc, sza_interp )
-            print "finished remapping"
+
             w=5
-            #f=fspecial('gaussian',2*w+1,w/2)
             f = matlab_style_gauss2D(w, w/2)
             f_sum = f.sum()
             N = l3u_sza.shape[0]
-            M = l3u_sza.shape[1]
-           
+            M = l3u_sza.shape[1]          
 
             
-            print "starting loop"
-            """
-            for n,m in zip(QL_rows,QL_cols):
-                
-                    s_win = S[max(0,n-w):min(N-1,n+w-1),max(0,m-w):min(M-1,m+w-1)]
-                    t_win = T[max(0,n-w):min(N-1,n+w-1),max(0,m-w):min(M-1,m+w-1)]
-                    h_win = H[max(0,n-w):min(N-1,n+w-1),max(0,m-w):min(M-1,m+w-1)]
-                    ind =  h_win != 0
-                    if ind.sum() > 0:
-                        if h_win.size == (2*w+1)**2:
-                            l3u_sza[n,m] = (f*s_win[ind]/h_win[ind]).sum()/f_sum
-                            l3u_time[n,m] = (f*t_win[ind]/h_win[ind]).sum()/f_sum
-                        else:
-                            l3u_sza[n,m] = np.mean(s_win[ind]/h_win[ind])
-                            l3u_time[n,m] = np.mean(t_win[ind]/h_win[ind])
-            """
             window_functions.smoothing(QL_flags, S, T, H, l3u_sza, l3u_time, f, f_sum)
+
+            print "concatenated", current_time
+
     else:
         current_time = current_time + time_delta
         continue
 
     if (current_time + time_delta).minute == 0:
-        sio.savemat( save_folder + (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S'),
-                     {'sst':l3u_sst, 'sza': l3u_sza, 'time' : l3u_time, 'day_flag':l3u_day})
+        save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"
+        utils.save_to_netCDF(l3u_sst, l3u_sza, l3u_time, l3u_day, save_folder+save_file)
         print "saved",(current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S')
+        
         l3u_sst.fill(np.nan)
         l3u_time.fill(np.nan)
         l3u_sza.fill(np.nan)
@@ -178,5 +157,5 @@ while current_time != next_day:
         H.fill(0)
         T.fill(0)
         S.fill(0)
-
+    
     current_time = current_time + time_delta

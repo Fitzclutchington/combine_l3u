@@ -1,4 +1,4 @@
-#Hourly L3U Concatenation
+# Hourly L3U Concatenation
 
 This program concatenates a day of granule per x minute data into granule per
 hour data.  The output file contains the following data:
@@ -13,4 +13,4 @@ the SZA and retrieval times are unquantized and remapped from corresponding L2P
 files.
 
 To run:
-`python combine_l3u.py input_l3u_folder input_l2p_folder output_concatenated_l3u_folder`
+`python combine_l3u_hourly.py input_l3u_folder input_l2p_folder output_concatenated_l3u_folder`
