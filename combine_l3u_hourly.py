@@ -42,7 +42,16 @@ def matlab_style_gauss2D(w, sigma):
         h /= sumh
     return h
 
+if len(sys.argv) != 5:
+    print "usage:python combine_l3u_hourly.py input_l3u_folder input_l2p_folder output_concatenated_l3u_folder modis_flag"
+    sys.exit()
+    
 save_folder = sys.argv[3]
+if not os.path.exists(save_folder):
+    os.makedirs(save_folder)
+
+modis_flag = bool(int(sys.argv[4]))
+
 folders = { 
             'l3u' : sys.argv[1],
             'l2p' : sys.argv[2]
@@ -65,7 +74,6 @@ endings = {
 
 dimensions = { 
                'l3u' : (utils.get_dimensions(files['l3u'][0],'lat','lon')),
-               'l2p' : (utils.get_dimensions(files['l2p'][0],'nj','ni'))
             }
 
 
@@ -75,10 +83,17 @@ q = [ dL,  -180-dL/2]
 N = 180/dL
 M = 360/dL
 
+w=5
+f = matlab_style_gauss2D(w, w/2)
+f_sum = f.sum()
+
 current_day_string = files['l3u'][0].split('/')[-1].split('-')[0][0:8]
 
 current_time = datetime.datetime.strptime(current_day_string+'0000', '%Y%m%d%H%M%S')
-time_delta = datetime.timedelta(minutes=10)
+if modis_flag:
+    time_delta = datetime.timedelta(minutes=5)
+else:
+    time_delta = datetime.timedelta(minutes=10)
 
 next_day = current_time + datetime.timedelta(days=1)
 next_hour = current_time + datetime.timedelta(hours=1)
@@ -130,9 +145,6 @@ while current_time != next_day:
 
             window_functions.remap(ii, jj, H,  T,  S, t_utc, sza_interp )
 
-            w=5
-            f = matlab_style_gauss2D(w, w/2)
-            f_sum = f.sum()
             N = l3u_sza.shape[0]
             M = l3u_sza.shape[1]          
 
@@ -146,6 +158,7 @@ while current_time != next_day:
         continue
 
     if (current_time + time_delta).minute == 0:
+
         save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"
         utils.save_to_netCDF(l3u_sst, l3u_sza, l3u_time, l3u_day, save_folder+save_file)
         print "saved",(current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S')

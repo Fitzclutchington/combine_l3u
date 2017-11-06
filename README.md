@@ -13,4 +13,8 @@ the SZA and retrieval times are unquantized and remapped from corresponding L2P
 files.
 
 To run:
-`python combine_l3u_hourly.py input_l3u_folder input_l2p_folder output_concatenated_l3u_folder`
+`python combine_l3u_hourly.py input_l3u_folder input_l2p_folder output_concatenated_l3u_folder modis_flag`
+
+The argument `modis_flag` must be 0 if the satellite is not modis and 1 if the
+satellite is modis.  This is necessary because observations for modis are taken 
+every 5 minutes while oversvations for all other sensors occur every 10 minutes.
