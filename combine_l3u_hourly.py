@@ -24,8 +24,11 @@ def interpolate_quantized_matrix(mat, interp_mat):
         mid_ind = np.zeros(edges.shape[0] + 1,dtype=np.uint16)
         mid_ind[-1] = end-1
         mid_ind[1:-1] = np.round((edges[0:-1]+edges[1:])/2)
-        f = interpolate.interp1d(mid_ind, mat[i,mid_ind])
-        interp_mat[i,:] = f(x_inds)
+        if mid_ind.shape[0] > 1:
+            f = interpolate.interp1d(mid_ind, mat[i,mid_ind])
+            interp_mat[i,:] = f(x_inds)
+        else:
+            interp_mat[i,:] = mat[i,:]
 
 def matlab_style_gauss2D(w, sigma):
     """
@@ -188,7 +191,7 @@ while current_time != next_day:
             H.fill(0)
             T.fill(0)
             S.fill(0)
-            
+
         current_time = current_time + time_delta
         continue
 
