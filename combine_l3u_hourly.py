@@ -144,7 +144,8 @@ while current_time != next_day:
             lon_L2 = utils.read_var(l2p_filename,'lon')
             ii = np.round((lat_L2 - p[1])/p[0]).astype(np.int32) - 1
             jj = np.round((lon_L2 - q[1])/q[0]).astype(np.int32) - 1
-            
+            ii[np.isnan(lat_L2)] = 3000
+            jj[np.isnan(lon_L2)] = 3000
 
             window_functions.remap(ii, jj, H,  T,  S, t_utc, sza_interp )
 

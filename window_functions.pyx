@@ -8,9 +8,10 @@ def remap(int[:,:] ii, int[:,:] jj, float[:,:] H, float[:,:] T, float[:,:] S,
 
     for i in range(N):
         for j in range(M):
-            H[ii[i,j],jj[i,j]] = H[ii[i,j],jj[i,j]] + 1
-            T[ii[i,j],jj[i,j]] = T[ii[i,j],jj[i,j]] + t_utc[i,j]
-            S[ii[i,j],jj[i,j]] = S[ii[i,j],jj[i,j]] + sza_interp[i,j]
+            if ii[i,j] != 3000 and jj[i,j] != 3000:
+                H[ii[i,j],jj[i,j]] = H[ii[i,j],jj[i,j]] + 1
+                T[ii[i,j],jj[i,j]] = T[ii[i,j],jj[i,j]] + t_utc[i,j]
+                S[ii[i,j],jj[i,j]] = S[ii[i,j],jj[i,j]] + sza_interp[i,j]
 
 def smoothing(char[:,:] QL, float[:,:] S, float[:,:] T, float[:,:] H, 
               double[:,:] l3u_sza, float[:,:] l3u_time, double[:,:] f, double f_sum):
