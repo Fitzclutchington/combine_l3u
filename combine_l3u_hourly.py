@@ -153,22 +153,42 @@ while current_time != next_day:
 
             print "concatenated", current_time
 
+        if (current_time + time_delta).minute == 0:
+            if not modis_flag:
+                save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"
+            else:
+                save_file = (current_time - datetime.timedelta(minutes=55)).strftime('%Y%m%d%H%M%S') + ".nc"
+            utils.save_to_netCDF(l3u_sst, l3u_sza, l3u_time, l3u_day, save_folder+save_file)
+            print "saved",(current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S')
+            
+            l3u_sst.fill(np.nan)
+            l3u_time.fill(np.nan)
+            l3u_sza.fill(np.nan)
+            l3u_day.fill(-1)
+            H.fill(0)
+            T.fill(0)
+            S.fill(0)
+    
+        current_time = current_time + time_delta
+
     else:
+
+        if (current_time + time_delta).minute == 0:
+            if not modis_flag:
+                save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"
+            else:
+                save_file = (current_time - datetime.timedelta(minutes=55)).strftime('%Y%m%d%H%M%S') + ".nc"
+            utils.save_to_netCDF(l3u_sst, l3u_sza, l3u_time, l3u_day, save_folder+save_file)
+            print "saved",(current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S')
+            
+            l3u_sst.fill(np.nan)
+            l3u_time.fill(np.nan)
+            l3u_sza.fill(np.nan)
+            l3u_day.fill(-1)
+            H.fill(0)
+            T.fill(0)
+            S.fill(0)
+            
         current_time = current_time + time_delta
         continue
 
-    if (current_time + time_delta).minute == 0:
-
-        save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"
-        utils.save_to_netCDF(l3u_sst, l3u_sza, l3u_time, l3u_day, save_folder+save_file)
-        print "saved",(current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S')
-        
-        l3u_sst.fill(np.nan)
-        l3u_time.fill(np.nan)
-        l3u_sza.fill(np.nan)
-        l3u_day.fill(-1)
-        H.fill(0)
-        T.fill(0)
-        S.fill(0)
-    
-    current_time = current_time + time_delta
