@@ -177,11 +177,8 @@ while current_time != next_day:
 
     else:
 
-        if (current_time + time_delta).minute == 0:
-            if not modis_flag:
-                save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"
-            else:
-                save_file = (current_time - datetime.timedelta(minutes=55)).strftime('%Y%m%d%H%M%S') + ".nc"
+        if (current_time + time_delta).minute == 0:            
+            save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"            
             utils.save_to_netCDF(l3u_sst, l3u_sza, l3u_time, l3u_day, save_folder+save_file)
             print "saved",(current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S')
             
