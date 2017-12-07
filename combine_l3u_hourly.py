@@ -49,7 +49,7 @@ if len(sys.argv) != 5:
     print "usage:python combine_l3u_hourly.py input_l3u_folder input_l2p_folder output_concatenated_l3u_folder modis_flag"
     sys.exit()
     
-save_folder = sys.argv[3]
+save_folder = sys.argv[3].strip('/')
 if not os.path.exists(save_folder):
     os.makedirs(save_folder)
 
@@ -102,6 +102,7 @@ next_day = current_time + datetime.timedelta(days=1)
 next_hour = current_time + datetime.timedelta(hours=1)
 
 l3u_sst = np.full(dimensions['l3u'],np.nan)
+l3u_sses = np.full(dimensions['l3u'],np.nan)
 l3u_sza = np.full(dimensions['l3u'],np.nan)
 l3u_time = np.full(dimensions['l3u'],np.nan).astype(np.float32)
 l3u_day = np.full(dimensions['l3u'],-1).astype(np.int8)
@@ -119,6 +120,7 @@ while current_time != next_day:
     # append sst
     if l3u_filename in sets['l3u']:
         current_sst = utils.read_var(l3u_filename,'sea_surface_temperature')
+        sses_bias = utils.read_var(l3u_filename,'sses_bias')
         QL_flags = utils.read_var(l3u_filename, 'quality_level')
         l2p_flags = utils.read_var(l3u_filename, 'l2p_flags')
         day_mask = np.bitwise_and(l2p_flags,512).astype(bool)
@@ -126,6 +128,7 @@ while current_time != next_day:
         
 
         l3u_sst[QL_mask] = current_sst[QL_mask]
+        l3u_sses[QL_mask] = sses_bias[QL_mask]
         l3u_day[day_mask] = 1
         l3u_day[~day_mask & QL_mask] = 0
         # compute time and sza
@@ -162,10 +165,12 @@ while current_time != next_day:
                 save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"
             else:
                 save_file = (current_time - datetime.timedelta(minutes=55)).strftime('%Y%m%d%H%M%S') + ".nc"
-            utils.save_to_netCDF(l3u_sst, l3u_sza, l3u_time, l3u_day, save_folder+save_file)
+            save_loc = save_folder + "/" + save_file
+            utils.save_to_netCDF(l3u_sst, l3u_sses,  l3u_sza, l3u_time, l3u_day, save_loc)
             print "saved",(current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S')
             
             l3u_sst.fill(np.nan)
+            l3u_sses.fill(np.nan)
             l3u_time.fill(np.nan)
             l3u_sza.fill(np.nan)
             l3u_day.fill(-1)
@@ -178,11 +183,16 @@ while current_time != next_day:
     else:
 
         if (current_time + time_delta).minute == 0:            
-            save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"            
-            utils.save_to_netCDF(l3u_sst, l3u_sza, l3u_time, l3u_day, save_folder+save_file)
+            if not modis_flag:
+                save_file = (current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S') + ".nc"
+            else:
+                save_file = (current_time - datetime.timedelta(minutes=55)).strftime('%Y%m%d%H%M%S') + ".nc"       
+            save_loc = save_folder + "/" + save_file   
+            utils.save_to_netCDF(l3u_sst, l3u_sses, l3u_sza, l3u_time, l3u_day, save_loc)
             print "saved",(current_time - datetime.timedelta(minutes=50)).strftime('%Y%m%d%H%M%S')
             
             l3u_sst.fill(np.nan)
+            l3u_sses.fill(np.nan)
             l3u_time.fill(np.nan)
             l3u_sza.fill(np.nan)
             l3u_day.fill(-1)

@@ -48,14 +48,14 @@ def compute_ending(filepath):
     ending = filename.split('-')
     return '-'+'-'.join(ending[1:])
 
-def save_to_netCDF(sst, sza, time, day, save_loc):
-    variable_names = ["sea_surface_temperature", "solar_zenith_angle",
+def save_to_netCDF(sst, sses_bias, sza, time, day, save_loc):
+    variable_names = ["sea_surface_temperature", "sses_bias", "solar_zenith_angle",
                       "retrieval_time", "day_mask"]
-    variable_data = [sst, sza, time, day]
+    variable_data = [sst, sses_bias, sza, time, day]
     l2p_name = "l2p_flags"
 
     h, w = sst.shape
-    
+    print save_loc
     rootgrp = netCDF4.Dataset(save_loc, "w", format="NETCDF4")
     height = rootgrp.createDimension("height", h)
     width = rootgrp.createDimension("width", w)
